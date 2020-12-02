@@ -22,6 +22,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/openshift/eventrouter/sinks"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/spf13/viper"
 
 	v1 "k8s.io/api/core/v1"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -74,13 +75,6 @@ var (
 	})
 )
 
-func init() {
-	prometheus.MustRegister(kubernetesWarningEventCounterVec)
-	prometheus.MustRegister(kubernetesNormalEventCounterVec)
-	prometheus.MustRegister(kubernetesInfoEventCounterVec)
-	prometheus.MustRegister(kubernetesUnknownEventCounterVec)
-}
-
 // EventRouter is responsible for maintaining a stream of kubernetes
 // system Events and pushing them to another channel for storage
 type EventRouter struct {
@@ -100,6 +94,13 @@ type EventRouter struct {
 
 // NewEventRouter will create a new event router using the input params
 func NewEventRouter(kubeClient kubernetes.Interface, eventsInformer coreinformers.EventInformer) *EventRouter {
+	if viper.GetBool("enable-prometheus") {
+		prometheus.MustRegister(kubernetesWarningEventCounterVec)
+		prometheus.MustRegister(kubernetesNormalEventCounterVec)
+		prometheus.MustRegister(kubernetesInfoEventCounterVec)
+		prometheus.MustRegister(kubernetesUnknownEventCounterVec)
+	}
+
 	er := &EventRouter{
 		kubeClient: kubeClient,
 		eSink:      sinks.ManufactureSink(),
@@ -119,7 +120,7 @@ func (er *EventRouter) Run(stopCh <-chan struct{}) {
 	defer utilruntime.HandleCrash()
 	defer glog.Infof("Shutting down EventRouter")
 
-	glog.Infof("Starting EvenRouter")
+	glog.Infof("Starting EventRouter")
 
 	// here is where we kick the caches into gear
 	if !cache.WaitForCacheSync(stopCh, er.eListerSynched) {
@@ -146,6 +147,9 @@ func (er *EventRouter) updateEvent(objOld interface{}, objNew interface{}) {
 
 // prometheusEvent is called when an event is added or updated
 func prometheusEvent(event *v1.Event) {
+	if !viper.GetBool("enable-prometheus") {
+		return
+	}
 	var counter prometheus.Counter
 	var err error
 

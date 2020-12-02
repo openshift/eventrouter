@@ -18,21 +18,22 @@ package main
 
 import (
 	"fmt"
-	"github.com/heptio/eventrouter/sinks"
+	"log"
+	"time"
+
+	"github.com/heptiolabs/eventrouter/sinks"
 	"github.com/kelseyhightower/envconfig"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/scheme"
 	ref "k8s.io/client-go/tools/reference"
-	"log"
-	"time"
 )
 
 type KafkaEnv struct {
 	Brokers  []string `required:"true"`
 	Topic    string   `required:"true"`
-	Async    bool     `default:true`
-	RetryMax int      `default:5`
+	Async    bool     `default:"true"`
+	RetryMax int      `default:"5"`
 }
 
 func main() {
@@ -42,7 +43,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	kSink, err := sinks.NewKafkaSink(k.Brokers, k.Topic, k.Async, k.RetryMax)
+	kSink, err := sinks.NewKafkaSink(k.Brokers, k.Topic, k.Async, k.RetryMax, "user", "password")
 	if err != nil {
 		log.Fatal(err)
 	}
