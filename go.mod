@@ -26,4 +26,4 @@ require (
 	k8s.io/client-go v12.0.0+incompatible
 )
 
-replace k8s.io/client-go => k8s.io/client-go v0.18.3 // Required by prometheus-operator
+replace k8s.io/client-go => k8s.io/client-go v0.18.3
