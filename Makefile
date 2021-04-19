@@ -14,13 +14,8 @@
 
 TARGET = eventrouter
 GOTARGET = github.com/openshift/$(TARGET)
-BUILDMNT = /go/src/$(GOTARGET)
-REGISTRY ?= gcr.io/heptio-images
-VERSION ?= v0.3
-IMAGE = $(REGISTRY)/$(BIN)
-BUILD_IMAGE ?= golang:1.14
-DOCKER ?= docker
-DIR := ${CURDIR}
+LOCAL_IMAGE_TAG=openshift/logging-eventrouter
+IMAGE_REPOSITORY_NAME=quay.io/openshift/logging-eventrouter:latest
 
 ifneq ($(VERBOSE),)
 VERBOSE_FLAG = -v
@@ -29,27 +24,17 @@ TESTARGS ?= $(VERBOSE_FLAG) -timeout 60s
 TEST_PKGS ?= $(GOTARGET)/sinks/...
 TEST = go test $(TEST_PKGS) $(TESTARGS)
 
-DOCKER_BUILD ?= $(DOCKER) run --rm -v $(DIR):$(BUILDMNT) -w $(BUILDMNT) $(BUILD_IMAGE) /bin/sh -c
+build: fmt
+	go build -o $(TARGET)
+.PHONY: build
 
-all: container
+fmt:
+	@echo gofmt
 
-container:
-	$(DOCKER_BUILD) 'go build'
-	$(DOCKER) build -t $(REGISTRY)/$(TARGET):latest -t $(REGISTRY)/$(TARGET):$(VERSION) .
-
-push:
-	$(DOCKER) push $(REGISTRY)/$(TARGET):latest
-	if git describe --tags --exact-match >/dev/null 2>&1; \
-	then \
-		$(DOCKER) push $(REGISTRY)/$(TARGET):$(VERSION); \
-	fi
+image:
+	podman build -f Dockerfile.rhel8 -t $(LOCAL_IMAGE_TAG) .
+.PHONY: image
 
 test:
-	$(DOCKER_BUILD) '$(TEST)'
-
-.PHONY: all local container push
-
-clean:
-	rm -f $(TARGET)
-	$(DOCKER) rmi $(REGISTRY)/$(TARGET):latest
-	$(DOCKER) rmi $(REGISTRY)/$(TARGET):$(VERSION)
+	go test $(TEST_PKGS) $(TESTARGS)
+.PHONY: test
