@@ -21,8 +21,6 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/openshift/eventrouter/sinks"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/spf13/viper"
 	v1 "k8s.io/api/core/v1"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	coreinformers "k8s.io/client-go/informers/core/v1"
@@ -30,58 +28,6 @@ import (
 	corelisters "k8s.io/client-go/listers/core/v1"
 	"k8s.io/client-go/tools/cache"
 )
-
-var (
-	kubernetesWarningEventCounterVec = prometheus.NewCounterVec(prometheus.CounterOpts{
-		Name: "heptio_eventrouter_warnings_total",
-		Help: "Total number of warning events in the kubernetes cluster",
-	}, []string{
-		"involved_object_kind",
-		"involved_object_name",
-		"involved_object_namespace",
-		"reason",
-		"source",
-	})
-	kubernetesNormalEventCounterVec = prometheus.NewCounterVec(prometheus.CounterOpts{
-		Name: "heptio_eventrouter_normal_total",
-		Help: "Total number of normal events in the kubernetes cluster",
-	}, []string{
-		"involved_object_kind",
-		"involved_object_name",
-		"involved_object_namespace",
-		"reason",
-		"source",
-	})
-	kubernetesInfoEventCounterVec = prometheus.NewCounterVec(prometheus.CounterOpts{
-		Name: "heptio_eventrouter_info_total",
-		Help: "Total number of info events in the kubernetes cluster",
-	}, []string{
-		"involved_object_kind",
-		"involved_object_name",
-		"involved_object_namespace",
-		"reason",
-		"source",
-	})
-	kubernetesUnknownEventCounterVec = prometheus.NewCounterVec(prometheus.CounterOpts{
-		Name: "heptio_eventrouter_unknown_total",
-		Help: "Total number of events of unknown type in the kubernetes cluster",
-	}, []string{
-		"involved_object_kind",
-		"involved_object_name",
-		"involved_object_namespace",
-		"reason",
-		"source",
-	})
-)
-
-func init() {
-	if viper.GetBool("enable-prometheus") {
-		prometheus.MustRegister(kubernetesWarningEventCounterVec)
-		prometheus.MustRegister(kubernetesNormalEventCounterVec)
-		prometheus.MustRegister(kubernetesInfoEventCounterVec)
-		prometheus.MustRegister(kubernetesUnknownEventCounterVec)
-	}
-}
 
 // EventRouter is responsible for maintaining a stream of kubernetes
 // system Events and pushing them to another channel for storage
@@ -138,7 +84,6 @@ func (er *EventRouter) addEvent(obj interface{}) {
 		glog.Error("Given object '%v' not v1.Event", obj)
 		return
 	}
-	prometheusEvent(e)
 	er.eSink.UpdateEvents(e, nil)
 }
 
@@ -158,60 +103,7 @@ func (er *EventRouter) updateEvent(objOld interface{}, objNew interface{}) {
 		// change nothing so we can skip it
 		return
 	}
-	prometheusEvent(eNew)
 	er.eSink.UpdateEvents(eNew, eOld)
-}
-
-// prometheusEvent is called when an event is added or updated
-func prometheusEvent(event *v1.Event) {
-	if !viper.GetBool("enable-prometheus") {
-		return
-	}
-
-	var counter prometheus.Counter
-	var err error
-
-	switch event.Type {
-	case "Normal":
-		counter, err = kubernetesNormalEventCounterVec.GetMetricWithLabelValues(
-			event.InvolvedObject.Kind,
-			event.InvolvedObject.Name,
-			event.InvolvedObject.Namespace,
-			event.Reason,
-			event.Source.Host,
-		)
-	case "Warning":
-		counter, err = kubernetesWarningEventCounterVec.GetMetricWithLabelValues(
-			event.InvolvedObject.Kind,
-			event.InvolvedObject.Name,
-			event.InvolvedObject.Namespace,
-			event.Reason,
-			event.Source.Host,
-		)
-	case "Info":
-		counter, err = kubernetesInfoEventCounterVec.GetMetricWithLabelValues(
-			event.InvolvedObject.Kind,
-			event.InvolvedObject.Name,
-			event.InvolvedObject.Namespace,
-			event.Reason,
-			event.Source.Host,
-		)
-	default:
-		counter, err = kubernetesUnknownEventCounterVec.GetMetricWithLabelValues(
-			event.InvolvedObject.Kind,
-			event.InvolvedObject.Name,
-			event.InvolvedObject.Namespace,
-			event.Reason,
-			event.Source.Host,
-		)
-	}
-
-	if err != nil {
-		// Not sure this is the right place to log this error?
-		glog.Warning(err)
-	} else {
-		counter.Add(1)
-	}
 }
 
 // deleteEvent should only occur when the system garbage collects events via TTL expiration
