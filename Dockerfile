@@ -10,4 +10,4 @@ FROM registry.access.redhat.com/ubi9/ubi-minimal
 USER 1000
 COPY --from=builder /go/src/github.com/openshift/eventrouter/eventrouter /bin/eventrouter
 CMD ["/bin/eventrouter", "-v", "3", "-logtostderr"]
-LABEL version=release-5.8
+LABEL version=release-5.9
