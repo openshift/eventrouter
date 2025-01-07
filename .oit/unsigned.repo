@@ -1,0 +1,14 @@
+[rhel-8-appstream-rpms-x86_64]
+baseurl = https://rhsm-pulp.corp.redhat.com/content/aus/rhel8/8.2/x86_64/appstream/os/
+enabled = 1
+name = rhel-8-appstream-rpms-x86_64
+gpgcheck = 0
+gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+
+[rhel-8-baseos-rpms-x86_64]
+baseurl = https://rhsm-pulp.corp.redhat.com/content/aus/rhel8/8.2/x86_64/baseos/os/
+enabled = 1
+name = rhel-8-baseos-rpms-x86_64
+gpgcheck = 0
+gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+

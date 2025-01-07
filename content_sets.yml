@@ -1,0 +1,21 @@
+
+# This file is managed by the doozer build tool: https://github.com/openshift-eng/doozer,
+# by the OpenShift Automated Release Team (#forum-ocp-art on CoreOS Slack).
+# Any manual changes will be overwritten by doozer on the next build.
+#
+# This is a file defining which content sets (yum repositories) are needed to
+# update content in this image. Data provided here helps determine which images
+# are vulnerable to specific CVEs. Generally you should only need to update this
+# file when:
+#    1. You start depending on a new product
+#    2. You are preparing new product release and your content sets will change
+#
+# See https://source.redhat.com/groups/public/container-build-system/container_build_system_wiki/guide_to_layered_image_build_service_osbs
+# for more information on maintaining this file and the format and examples.
+#
+# You should have one top level item for each architecture being built. Most
+# likely this will be x86_64 and ppc64le initially.
+---
+x86_64:
+- rhel-8-for-x86_64-appstream-eus-rpms__8_DOT_2
+- rhel-8-for-x86_64-baseos-eus-rpms__8_DOT_2

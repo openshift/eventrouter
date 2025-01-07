@@ -1,0 +1,27 @@
+
+# This file is managed by Doozer: https://github.com/openshift-eng/art-tools/tree/main/doozer
+# operated by the OpenShift Automated Release Tooling team (#forum-ocp-art on CoreOS Slack).
+
+# Any manual changes will be overwritten by Doozer on the next build.
+#
+# See https://source.redhat.com/groups/public/container-build-system/container_build_system_wiki/odcs_integration_with_osbs
+# for more information on maintaining this file and the format and examples
+
+---
+platforms:
+  only:
+  - x86_64
+remote_sources:
+- name: cachito-gomod-with-deps
+  remote_source:
+    flags:
+    - remove-unsafe-symlinks
+    pkg_managers:
+    - gomod
+    ref: 3134f6af9e41a57228a22d8071a860e2d92b4278
+    repo: https://github.com/openshift/eventrouter
+tags:
+- assembly.stream
+- v4.6
+- v4.6.0
+- v4.6.0.20250107.204624
