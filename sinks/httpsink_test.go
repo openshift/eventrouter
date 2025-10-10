@@ -65,7 +65,7 @@ func TestUpdateEvents(t *testing.T) {
 	}
 	podRef, err := ref.GetReference(scheme.Scheme, testPod)
 	if err != nil {
-		t.Fatal("%s", err.Error())
+		t.Fatalf("%s", err.Error())
 	}
 
 	evt := makeFakeEvent(podRef, v1.EventTypeWarning, "CreateInCluster", "Fake pod creation event")
