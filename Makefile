@@ -33,8 +33,7 @@ fmt:
 	@echo gofmt
 
 image:
-	podman build $(CONTAINER_BUILD_ARGS) --build-arg BUILD_VERSION=$(BUILD_VERSION)  -f Dockerfile .
-	podman tag localhost/eventrouter $(IMAGE_REPOSITORY_NAME)
+	podman build -t $(IMAGE_REPOSITORY_NAME) $(CONTAINER_BUILD_ARGS) --build-arg BUILD_VERSION=$(BUILD_VERSION)  -f Dockerfile .
 
 image-push: image
 	podman manifest push --all $(IMAGE_REPOSITORY_NAME) docker://$(IMAGE_REPOSITORY_NAME)
