@@ -3,7 +3,7 @@ module github.com/openshift/eventrouter
 go 1.24.0
 
 require (
-	github.com/IBM/sarama v1.46.1
+	github.com/IBM/sarama v1.46.2
 	github.com/crewjam/rfc5424 v0.1.0
 	github.com/eapache/channels v1.1.0
 	github.com/golang/glog v1.2.5
@@ -46,7 +46,7 @@ require (
 	github.com/jcmturner/rpc/v2 v2.0.3 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/klauspost/compress v1.18.0 // indirect
+	github.com/klauspost/compress v1.18.1 // indirect
 	github.com/magiconair/properties v1.8.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mitchellh/mapstructure v1.1.2 // indirect
