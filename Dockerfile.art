@@ -1,0 +1,35 @@
+FROM registry-proxy.engineering.redhat.com/rh-osbs/openshift-golang-builder:v1.24.6-202510150934.g4284440.el9 AS builder
+
+ENV GOEXPERIMENT=strictfipsruntime
+ENV CGO_ENABLED=1
+
+COPY . /opt/app-root/src
+WORKDIR /opt/app-root/src
+
+RUN go build -tags strictfipsruntime -mod=mod -o eventrouter
+
+FROM registry.redhat.io/ubi9/ubi-minimal:9.7
+
+COPY --from=builder /opt/app-root/src/eventrouter /bin/eventrouter
+
+USER nobody
+
+CMD ["/bin/sh", "-c", "/bin/eventrouter -v 3 -logtostderr"]
+
+LABEL \
+        com.redhat.component="logging-eventrouter-container" \
+        description="Eventrouter container for collection of kubernetes audit events" \
+        distribution-scope="subscription" \
+        io.k8s.description="Eventrouter container for collection of kubernetes audit events" \
+        io.k8s.display-name="EventRouter" \
+        io.openshift.maintainer.component="Logging" \
+        io.openshift.maintainer.product="OpenShift Container Platform" \
+        io.openshift.tags="logging,eventrouter,observability" \
+        license="Apache-2.0" \
+        maintainer="AOS Logging <team-logging@redhat.com>" \
+        name="openshift-logging/eventrouter-rhel9" \
+        summary="Event collection agent for Red Hat Openshift Logging" \
+        url="https://catalog.redhat.com/en/software/containers/openshift-logging/eventrouter-rhel9/6447991dbda4d3e9df61cfc2" \
+        vendor="Red Hat, Inc." \
+        version_minor="v0.4" \
+        version="v0.4.0"
