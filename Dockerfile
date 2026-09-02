@@ -1,4 +1,4 @@
-FROM golang:1.25 AS builder
+FROM golang:1.26.7 AS builder
 WORKDIR  /go/src/github.com/openshift/eventrouter
 USER 0
 
