@@ -8,7 +8,7 @@ WORKDIR /opt/app-root/src
 
 RUN go build -tags strictfipsruntime -mod=mod -o eventrouter
 
-FROM registry.redhat.io/ubi9/ubi-minimal:9.7
+FROM registry.access.redhat.com/ubi9/ubi-micro
 
 COPY --from=builder /opt/app-root/src/eventrouter /bin/eventrouter
 
