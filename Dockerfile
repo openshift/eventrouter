@@ -9,7 +9,7 @@ COPY sinks ./sinks
 
 RUN make build
 
-FROM registry.access.redhat.com/ubi9/ubi-minimal
+FROM registry.access.redhat.com/ubi9/ubi-micro
 
 ARG BUILD_VERSION=0.5.0
 USER 1000
