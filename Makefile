@@ -25,8 +25,12 @@ TESTARGS ?= $(VERBOSE_FLAG) -timeout 60s
 TEST_PKGS ?= $(GOTARGET)/sinks/...
 TEST = go test $(TEST_PKGS) $(TESTARGS)
 
-build: fmt
+# check-deps brackets the build for the same reason as in test: the root
+# package is not covered by TEST_PKGS, so go build -mod=mod is where its
+# new dependencies materialize in go.sum.
+build: fmt check-deps
 	go build -mod=mod -o $(TARGET)
+	@$(MAKE) --no-print-directory check-deps
 .PHONY: build
 
 fmt:
@@ -40,6 +44,20 @@ image-push: image
 
 .PHONY: image
 
-test:
+# Guard: none of the removed sink dependency families may return to
+# go.mod or go.sum. (klauspost/compress is excluded: it remains a
+# test-only indirect dep of prometheus/client_golang, which is kept for
+# /metrics; it is not linked into the eventrouter binary.)
+check-deps:
+	@if grep -Eq 'IBM/sarama|crewjam/rfc5424|eapache|sethgrid/pester|jcmturner|pierrec/lz4|golang/snappy|hashicorp/go-uuid|rcrowley/go-metrics' go.mod go.sum; then \
+		echo "ERROR: banned dependency family present in go.mod or go.sum"; exit 1; \
+	fi
+.PHONY: check-deps
+
+# check-deps runs both before (fail fast on a dirty go.sum) and after
+# go test: -mod=mod lets go test add checksums to go.sum, so only the
+# post-test check can catch a dependency introduced by this run.
+test: check-deps
 	go test -mod=mod $(TEST_PKGS) $(TESTARGS)
+	@$(MAKE) --no-print-directory check-deps
 .PHONY: test

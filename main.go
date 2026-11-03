@@ -19,7 +19,6 @@ package main
 import (
 	"flag"
 	"net/http"
-	"net/http/pprof"
 	"os"
 	"os/signal"
 	"sync"
@@ -72,10 +71,8 @@ func loadConfig() kubernetes.Interface {
 	viper.AddConfigPath("/etc/eventrouter/")
 	viper.AddConfigPath(".")
 	viper.SetDefault("kubeconfig", "")
-	viper.SetDefault("sink", "glog")
 	viper.SetDefault("resync-interval", time.Minute*30)
 	viper.SetDefault("enable-prometheus", true)
-	viper.SetDefault("enable-http-pprof", false)
 	if err = viper.ReadInConfig(); err != nil {
 		panic(err.Error())
 	}
@@ -118,26 +115,10 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	// Add handler for /debug/pprof
-	if viper.GetBool("enable-http-pprof") {
-		glog.Info("Starting http/pprof handler.")
-
-		// copied from net/http/pprof init()
-		mux.HandleFunc("/debug/pprof/", pprof.Index)
-		mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
-		mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
-		mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
-		mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
-	}
-
-	// Add handler for /metrics
+	// Serve /metrics for Prometheus scraping
 	if viper.GetBool("enable-prometheus") {
 		glog.Info("Starting prometheus metrics.")
 		mux.Handle("/metrics", promhttp.Handler())
-	}
-
-	// Start the http listener for Prometheus Metrics or pprof debugging
-	if viper.GetBool("enable-http-pprof") || viper.GetBool("enable-prometheus") {
 		go func() {
 			glog.Warning(http.ListenAndServe(*addr, mux))
 		}()
