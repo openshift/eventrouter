@@ -1,0 +1,24 @@
+{
+  "@context": "https://openvex.dev/ns/v0.2.0",
+  "@id": "https://github.com/openshift/eventrouter/.vex/buildkit.json",
+  "author": "Red Hat OpenShift Logging <openshift-logging@redhat.com>",
+  "timestamp": "2026-11-09T00:00:00Z",
+  "version": 1,
+  "statements": [
+    {
+      "vulnerability": {
+        "@id": "https://nvd.nist.gov/vuln/detail/CVE-2026-75593",
+        "name": "CVE-2026-75593",
+        "description": "BuildKit: File escape vulnerability allows unauthorized file modification."
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/eventrouter-rhel9?repository_url=registry.redhat.io%2Fopenshift-logging%2Feventrouter-rhel9"
+        }
+      ],
+      "status": "not_affected",
+      "justification": "component_not_present",
+      "impact_statement": "Eventrouter does not depend on moby/buildkit: the package appears in neither go.mod nor go.sum, and eventrouter is not a build tool. Scanner matches occur via keyword matching on 'buildkit' keywords in image metadata, not a dependency relationship. Because the component is absent, eventrouter is not affected by any CVE in github.com/moby/buildkit; CVE-2026-75593 is the known instance of this pattern, recorded here as the representative case. Confirmed absent from the manifests both before and after PR #69."
+    }
+  ]
+}
