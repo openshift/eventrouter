@@ -1,0 +1,24 @@
+{
+  "@context": "https://openvex.dev/ns/v0.2.0",
+  "@id": "https://github.com/openshift/eventrouter/.vex/go-git.json",
+  "author": "Red Hat OpenShift Logging <openshift-logging@redhat.com>",
+  "timestamp": "2026-11-09T00:00:00Z",
+  "version": 1,
+  "statements": [
+    {
+      "vulnerability": {
+        "@id": "https://nvd.nist.gov/vuln/detail/CVE-2026-71556",
+        "name": "CVE-2026-71556",
+        "description": "go-git: Arbitrary file read/write via symbolic link resolution."
+      },
+      "products": [
+        {
+          "@id": "pkg:oci/eventrouter-rhel9?repository_url=registry.redhat.io%2Fopenshift-logging%2Feventrouter-rhel9"
+        }
+      ],
+      "status": "not_affected",
+      "justification": "component_not_present",
+      "impact_statement": "Eventrouter does not depend on go-git: the package appears in neither go.mod nor go.sum, and eventrouter performs no Git operations. Scanner matches occur via keyword matching on 'git' keywords in image metadata, not a dependency relationship. Because the component is absent, eventrouter is not affected by any CVE in github.com/go-git/go-git; CVE-2026-71556 is the known instance of this pattern (flagged against the sibling cluster-logging operator image, LOG-10083/LOG-10084/LOG-10085), recorded here as the representative case. Confirmed absent from the manifests both before and after PR #69."
+    }
+  ]
+}
