@@ -17,11 +17,6 @@ limitations under the License.
 package sinks
 
 import (
-	"encoding/json"
-	"fmt"
-	"io"
-
-	"github.com/crewjam/rfc5424"
 	"k8s.io/api/core/v1"
 )
 
@@ -51,32 +46,4 @@ func NewEventData(eNew *v1.Event, eOld *v1.Event) EventData {
 	}
 
 	return eData
-}
-
-// WriteRFC5424 writes the current event data to the given io.Writer using
-// RFC5424 (syslog over TCP) syntax.
-func (e *EventData) WriteRFC5424(w io.Writer) (int64, error) {
-	var eJSONBytes []byte
-	var err error
-	if eJSONBytes, err = json.Marshal(e); err != nil {
-		return 0, fmt.Errorf("failed to json serialize event: %v", err)
-	}
-
-	// Each message should look like an RFC5424 syslog message:
-	// <NumberOfBytes/ASCII encoded integer><Space character><RFC5424 message:NumberOfBytes long>
-	//
-	// Note: There are some restrictions on length and character space for
-	// Hostname and AppName, see
-	// https://github.com/crewjam/rfc5424/blob/master/marshal.go#L90. There's no
-	// attempt at trying to clean them up here because hostnames and component
-	// names already adhere to this convention in practice.
-	msg := rfc5424.Message{
-		Priority:  rfc5424.Daemon,
-		Timestamp: e.Event.LastTimestamp.Time,
-		Hostname:  e.Event.Source.Host,
-		AppName:   e.Event.Source.Component,
-		Message:   eJSONBytes,
-	}
-
-	return msg.WriteTo(w)
 }
